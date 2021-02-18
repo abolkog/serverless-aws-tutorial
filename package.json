@@ -1,0 +1,24 @@
+{
+  "name": "serverless-tutorial",
+  "version": "1.0.0",
+  "description": "Repo for the tutorial [Serverless Framework with AWS Tutorial - Arabic ](https://youtube.com/c/khalidelshafie)",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abolkog/serverless-aws-tutorial.git"
+  },
+  "author": "Khalid Elshafie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abolkog/serverless-aws-tutorial/issues"
+  },
+  "homepage": "https://github.com/abolkog/serverless-aws-tutorial#readme",
+  "devDependencies": {
+    "aws-sdk": "^2.844.0"
+  },
+  "dependencies": {
+    "uuid": "^8.3.2"
+  }
+}

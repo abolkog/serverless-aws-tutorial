@@ -7,39 +7,33 @@ provider:
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
   region: ap-southeast-2
+  stage: ${opt:stage , 'dev'}
   apiGateway:
     shouldStartNameWithService: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        Fn::GetAtt:
+          - OrdersTable
+          - Arn
+  environment:
+    orderTableName: ${self:custom.orderTableName}
 
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-
+custom:
+  orderTableName: orders-table-${self:provider.stage}
 
 functions:
-  hello:
-    handler: handler.hello
+  createOrder:
+    handler: src/lambdas/create-order.handler
     events:
       - http:
-          method: GET
-          path: /
+          method: POST
+          path: /orders/create-order
           cors: true
   getOrder:
     handler: src/lambdas/get-order.handler
@@ -50,14 +44,20 @@ functions:
           cors: true
 
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+
+resources:
+ Resources:
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: ${self:custom.orderTableName}
+   
