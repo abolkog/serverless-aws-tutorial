@@ -5,12 +5,12 @@ const DynamoService = require('../services/dynamo.service');
 module.exports.handler = async (event, ctx, cb) => {
   const { body = {} } = event;
 
-  const { name = '', amount = 0 } = JSON.parse(body);
+  const { name = '', total = 0 } = JSON.parse(body);
 
   const order = {
     id: uuid(),
     name,
-    amount,
+    total,
     createdAt: Date.now(),
   };
 
