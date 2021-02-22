@@ -1,23 +1,24 @@
 const { v4: uuid } = require('uuid');
 const ApiResponse = require('../util/apiResponse');
-const DynamoService = require('../services/dynamo.service');
+const sqsService = require('../services/sqs.service');
 
 module.exports.handler = async (event, ctx, cb) => {
   const { body = {} } = event;
 
   const { name = '', total = 0 } = JSON.parse(body);
+  const id = uuid();
 
   const order = {
-    id: uuid(),
+    id,
     name,
     total,
     createdAt: Date.now(),
   };
 
   try {
-    const tableName = process.env.orderTableName;
-    await DynamoService.write(order, tableName);
-    return cb(null, ApiResponse.ok({ message: 'success' }));
+    const queueURL = process.env.ordersQueue;
+    await sqsService.sendMessage(queueURL, JSON.stringify(order));
+    return cb(null, ApiResponse.ok({ message: 'success', id }));
   } catch (e) {
     return cb(
       null,

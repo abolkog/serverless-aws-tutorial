@@ -31,22 +31,42 @@ provider:
           - - 'arn:aws:s3:::'
             - 'Ref': 'OrdersBucket'
             - '/*'
+    - Effect: Allow
+      Action:
+        - SQS:SendMessage
+        - SQS:DeleteMessage
+        - SQS:GetQueueUrl
+        - SQS:ReceiveMessage
+      Resource:
+        Fn::GetAtt: 
+          - OrdersQueue  
+          - Arn
   environment:
     orderTableName: ${self:custom.orderTableName}
     ordersBucketName: ${self:custom.ordersBucketName}
+    ordersQueue: { Ref: OrdersQueue }
 
 custom:
   orderTableName: orders-table-${self:provider.stage}
   ordersBucketName: sls-tut-arabic-orders-bucket-${self:provider.stage}
+  ordersQueue: orders-queue-${self:provider.stage}
 
 functions:
-  createOrder:
-    handler: src/lambdas/create-order.handler
+  orderProducer:
+    handler: src/lambdas/order-producer.handler
     events:
       - http:
           method: POST
           path: /orders/create-order
           cors: true
+  orderConsumer:
+    handler: src/lambdas/order-consumer.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: 
+              - OrdersQueue
+              - Arn
   getOrder:
     handler: src/lambdas/get-order.handler
     events:
@@ -83,4 +103,8 @@ resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ${self:custom.ordersBucketName}
+  OrdersQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:custom.ordersQueue}
    
