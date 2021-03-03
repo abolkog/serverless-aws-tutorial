@@ -1,6 +1,6 @@
 const { v4: uuid } = require('uuid');
-const DynamoService = require('../services/dynamo.service');
 const s3Service = require('../services/s3.service');
+const snsService = require('../services/sns.service');
 
 module.exports.handler = event => {
   const { Records = [] } = event;
@@ -17,10 +17,10 @@ module.exports.handler = event => {
           ...item,
         }));
 
-        const tableName = process.env.orderTableName;
-        await DynamoService.writeBatch(orders, tableName);
+        const { ordersTopicARN } = process.env;
+        await snsService.publishMessage(JSON.stringify(orders), ordersTopicARN);
       } catch (e) {
-        console.log('Error processing order');
+        console.log('Error publishing order');
         console.log(e);
       }
     } //End if

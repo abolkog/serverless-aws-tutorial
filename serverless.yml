@@ -41,15 +41,23 @@ provider:
         Fn::GetAtt: 
           - OrdersQueue  
           - Arn
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource:
+        - ${self:custom.ordersTopicARN}
   environment:
     orderTableName: ${self:custom.orderTableName}
     ordersBucketName: ${self:custom.ordersBucketName}
     ordersQueue: { Ref: OrdersQueue }
+    ordersTopicARN: ${self:custom.ordersTopicARN}
 
 custom:
   orderTableName: orders-table-${self:provider.stage}
   ordersBucketName: sls-tut-arabic-orders-bucket-${self:provider.stage}
   ordersQueue: orders-queue-${self:provider.stage}
+  ordersTopic: orders-topic-${self:provider.stage}
+  ordersTopicARN: {"Fn::Join": ["", ["arn:aws:sns:${self:provider.region}:", {"Ref": "AWS::AccountId"}, ":${self:custom.ordersTopic}" ] ] }
 
 functions:
   orderProducer:
@@ -74,13 +82,18 @@ functions:
           method: GET
           path: /orders/get-order/{id}
           cors: true
-  orderProcessor:
-    handler: src/lambdas/order-processor.handler
+  orderPublisher:
+    handler: src/lambdas/order-publisher.handler
     events:
       - s3:
           bucket: ${self:custom.ordersBucketName}
           event: s3:ObjectCreated:*
           existing: true
+  orderSubscriber:
+    handler: src/lambdas/order-subscriber.handler
+    events:
+      - sns:
+          topicName: ${self:custom.ordersTopic}
 
 
 
