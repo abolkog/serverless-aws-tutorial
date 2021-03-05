@@ -7,4 +7,4 @@ Repo for the tutorial [Serverless Framework with AWS Tutorial - Arabic ](https:/
 
 Here is the system at the latest stage
 
-![Flow](https://raw.githubusercontent.com/abolkog/serverless-aws-tutorial/master/imgs/sls-tut-part5.png)
+![Flow](https://raw.githubusercontent.com/abolkog/serverless-aws-tutorial/master/imgs/sls-tut-part6.png)
