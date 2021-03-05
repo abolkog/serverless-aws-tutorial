@@ -94,6 +94,13 @@ functions:
     events:
       - sns:
           topicName: ${self:custom.ordersTopic}
+  orderNotifier:
+    handler: src/lambdas/order-notifier.handler
+    events:
+      - sns:
+          topicName: ${self:custom.ordersTopic}
+    environment:
+      SLACK_HOOK: ${ssm:/tutorial/sls/slack-hook~true}
 
 
 
